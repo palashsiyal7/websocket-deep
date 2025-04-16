@@ -1,0 +1,21 @@
+{
+  "name": "websocket-deep",
+  "version": "1.0.0",
+  "description": "WebSocket server with heartbeat mechanism and offline support",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js",
+    "serve": "node serve.js",
+    "dev": "concurrently \"nodemon server.js\" \"nodemon serve.js\"",
+    "dev:ws": "nodemon server.js",
+    "dev:static": "nodemon serve.js"
+  },
+  "dependencies": {
+    "express": "^4.18.2",
+    "ws": "^8.13.0"
+  },
+  "devDependencies": {
+    "concurrently": "^8.0.1",
+    "nodemon": "^2.0.22"
+  }
+} 
