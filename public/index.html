@@ -5,6 +5,8 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>WebSocket Connection Demo</title>
   <link rel="stylesheet" href="css/styles.css">
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🔌</text></svg>">
+  <meta name="theme-color" content="#3a86ff">
 </head>
 <body>
   <div class="container">
@@ -17,13 +19,13 @@
     </header>
 
     <main>
-      <div id="error-page" class="hidden">
+      <div id="error-page" class="hidden fade-in">
         <h2>Failed to connect to the server.</h2>
         <p>Please check your internet connection and try again.</p>
         <button id="retry-button">Retry Connection</button>
       </div>
 
-      <div id="connection-details">
+      <div id="connection-details" class="fade-in">
         <div class="status-card">
           <h3>WebSocket Status</h3>
           <p id="websocket-status">Disconnected</p>
@@ -34,10 +36,10 @@
         </div>
       </div>
 
-      <div class="message-container">
+      <div class="message-container fade-in">
         <h3>Send a Message</h3>
         <div class="message-form">
-          <input type="text" id="message-input" placeholder="Type a message">
+          <input type="text" id="message-input" placeholder="Type a message..." autocomplete="off">
           <button id="send-button" disabled>Send</button>
         </div>
         <div class="message-log">
@@ -46,6 +48,10 @@
         </div>
       </div>
     </main>
+
+    <footer class="fade-in">
+      <p>WebSocket server with heartbeat mechanism and offline support</p>
+    </footer>
   </div>
 
   <script src="js/app.js"></script>

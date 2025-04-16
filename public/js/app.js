@@ -42,6 +42,14 @@ function init() {
     }
   });
 
+  // Add focus and blur events for input animations
+  messageInput.addEventListener('focus', () => {
+    messageInput.parentElement.classList.add('focused');
+  });
+  messageInput.addEventListener('blur', () => {
+    messageInput.parentElement.classList.remove('focused');
+  });
+
   // Connect to WebSocket if online
   if (isOnline) {
     connectWebSocket();
@@ -113,6 +121,9 @@ function handleOnline() {
   console.log('Network is online');
   updateNetworkStatus();
   
+  // Add notification
+  showNotification('Network connection restored', 'success');
+  
   // Reconnect WebSocket
   if (!socket || socket.readyState !== WebSocket.OPEN) {
     connectWebSocket();
@@ -124,10 +135,32 @@ function handleOffline() {
   console.log('Network is offline');
   updateNetworkStatus();
   
+  // Add notification
+  showNotification('Network connection lost', 'error');
+  
   if (socket) {
     // No need to explicitly close, but update UI
     addMessageToHistory('System', 'Network connection lost. Reconnecting when online...', 'system');
   }
+}
+
+// Show notification
+function showNotification(message, type = 'info') {
+  // Create notification element
+  const notification = document.createElement('div');
+  notification.className = `notification notification-${type} fade-in`;
+  notification.innerHTML = `<span>${message}</span>`;
+  
+  // Add to DOM
+  document.body.appendChild(notification);
+  
+  // Remove after a delay
+  setTimeout(() => {
+    notification.classList.add('fade-out');
+    setTimeout(() => {
+      notification.remove();
+    }, 300); // Match with CSS transition time
+  }, 3000);
 }
 
 // Connect to WebSocket server
@@ -163,6 +196,7 @@ function connectWebSocket() {
       
       if (!isFirstConnect) {
         addMessageToHistory('System', 'Reconnected to server', 'system');
+        showNotification('Reconnected to server', 'success');
       } else {
         addMessageToHistory('System', 'Connected to server', 'system');
         isFirstConnect = false;
@@ -218,6 +252,7 @@ function connectWebSocket() {
     socket.addEventListener('error', (error) => {
       console.error('WebSocket error:', error);
       addMessageToHistory('System', 'Connection error', 'system');
+      showNotification('Connection error', 'error');
       
       // Show error page on first connection attempt
       if (isFirstConnect) {
@@ -243,7 +278,7 @@ function scheduleReconnect() {
   const delay = Math.min(baseDelay * Math.pow(1.5, reconnectAttempts - 1), maxReconnectDelay);
   
   console.log(`Scheduling reconnect in ${delay}ms (attempt ${reconnectAttempts})`);
-  addMessageToHistory('System', `Reconnecting in ${delay/1000} seconds...`, 'system');
+  addMessageToHistory('System', `Reconnecting in ${Math.round(delay/1000)} seconds...`, 'system');
   
   reconnectTimer = setTimeout(connectWebSocket, delay);
 }
@@ -268,6 +303,11 @@ function sendMessage() {
     
     // Clear input
     messageInput.value = '';
+    
+    // Add subtle animation
+    const lastMessage = messageHistory.lastElementChild;
+    lastMessage.classList.add('message-highlight');
+    setTimeout(() => lastMessage.classList.remove('message-highlight'), 1000);
   }
 }
 
@@ -279,6 +319,9 @@ function addMessageToHistory(sender, message, type) {
   const time = new Date();
   const timeStr = formatTime(time);
   
+  // Handle links in messages
+  message = linkify(escapeHtml(message));
+  
   messageItem.innerHTML = `
     <strong>${sender}:</strong> ${message}
     <div class="timestamp">${timeStr}</div>
@@ -286,6 +329,19 @@ function addMessageToHistory(sender, message, type) {
   
   messageHistory.appendChild(messageItem);
   messageHistory.scrollTop = messageHistory.scrollHeight;
+}
+
+// Escape HTML to prevent XSS
+function escapeHtml(text) {
+  const div = document.createElement('div');
+  div.textContent = text;
+  return div.innerHTML;
+}
+
+// Convert URLs to links
+function linkify(text) {
+  const urlRegex = /(https?:\/\/[^\s]+)/g;
+  return text.replace(urlRegex, url => `<a href="${url}" target="_blank" rel="noopener noreferrer">${url}</a>`);
 }
 
 // Format time
